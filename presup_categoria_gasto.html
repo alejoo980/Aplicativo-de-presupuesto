@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #333;
+      background-color: #f5f5f5;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 48px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    header a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 20px;
+    }
+
+    h1,
+    h2 {
+      font-size: 48px;
+      font-weight: bold;
+      text-align: center;
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    table {
+      margin-bottom: 20px;
+    }
+
+    td {
+      padding: 10px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      padding: 5px;
+      width: 200px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    input[type="submit"] {
+      padding: 10px 20px;
+      background-color: #f44336;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #b71c1c;
+    }
+  </style>
+
+  <meta charset='utf-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <title>Categoría de Gasto</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <script type="text/javascript" src="scripts/funciones.js"></script>
+  <script type="text/javascript">
+    var vRegistroActual = 0;
+    var vCantidadRegistros = 0;
+    var vArrCatsGasto = null;
+
+    // Se declara una variable para manejar la categoría de gasto
+    var objCatGasto = new Object();
+    objCatGasto.codigo = '';
+    objCatGasto.nombre = '';
+    objCatGasto.limite = 0;
+
+    function boton_guardar() {
+      // Se llena la variable de categoría de gasto con los valores que están en la página (formulario)
+      objCatGasto.codigo = document.getElementById('co').value;
+      objCatGasto.nombre = document.getElementById('no').value;
+      objCatGasto.limite = document.getElementById('li').value;
+
+      if (objCatGasto.codigo == '' || objCatGasto.nombre == '' || objCatGasto.limite == '') {
+        // Se le informa el error al usuario
+        alert('ERROR, debe diligenciar los datos obligatorios.');
+
+        // Se interrumpe la ejecución de la función
+        return;
+      }
+
+      // Se invoca la función que almacena la categoría de gasto
+      cat_gasto_guardar(objCatGasto);
+
+      // Se confirma el correcto almacenamiento
+      alert('Registro almacenado exitosamente!');
+
+      // Se limpian todos los valores del formulario
+      document.getElementById('frmPpal').reset();
+    }
+
+    function boton_consultar(pAccion) {
+      if (pAccion == 'consultar') {
+        // Se invocó la consulta inicial
+
+        // Se consulta el local storage
+        vArrCatsGasto = cat_gasto_consultar();
+
+        if (vArrCatsGasto == null) {
+          // La consulta no arrojó resultado
+          alert('Error, no existen registros!');
+
+          // Se interrumpe la ejecución de la función
+          return;
+        }
+
+        // Se obtiene el tamaño del resultado de la consulta
+        vCantidadRegistros = vArrCatsGasto.length;
+
+        // Se inicializa el registro actual
+        vRegistroActual = 1;
+
+        // Se obtiene el registro del Array
+        objCatGasto = vArrCatsGasto[vRegistroActual - 1];
+      }
+      else if (pAccion == 'siguiente') {
+        // Se invocó al registro siguiente
+
+        if (vArrCatsGasto == null) {
+          // No exsiste una consulta activa
+          alert('Error, no hay una consulta activa. Primero debe invocar el botón "Consultar"!')
+
+          // Se interrumpe la ejecución de la función
+          return;
+        }
+
+        if (vRegistroActual == vArrCatsGasto.length) {
+          // Ya se mostró el último registro, no hay más registros para mostrar
+          alert('Este es el último registro!');
+          return;
+        }
+        else {
+          // Se incrementa el contador de registro
+          vRegistroActual++;
+
+          // Se obtiene el registro del Array
+          objCatGasto = vArrCatsGasto[vRegistroActual - 1];
+        }
+      }
+      else if (pAccion == 'anterior') {
+        // Se invocó al registro anterior
+
+        if (vArrCatsGasto == null) {
+          // No exsiste una consulta activa
+          alert('Error, no hay una consulta activa. Primero debe invocar el botón "Consultar"!')
+
+          // Se interrumpe la ejecución de la función
+          return;
+        }
+
+        if (vRegistroActual == 1) {
+          // Ya se mostró el primer registro, no hay más registros para mostrar
+          alert('Este es el primer registro!');
+          return;
+        }
+        else {
+          // Se decrementa el contador de registro
+          vRegistroActual -= 1;
+
+          // Se obtiene el registro del Array
+          objCatGasto = vArrCatsGasto[vRegistroActual - 1];
+        }
+      }
+      else if (pAccion == 'primero') {
+        // Se invocó al registro siguiente
+
+        if (vArrCatsGasto == null) {
+          // No exsiste una consulta activa
+          alert('Error, no hay una consulta activa. Primero debe invocar el botón "Consultar"!')
+
+          // Se interrumpe la ejecución de la función
+          return;
+        }
+
+        if (vRegistroActual == 1) {
+          // Ya se mostró el primer registro, no hay más registros para mostrar
+          alert('Este es el primer registro!');
+          return;
+        }
+        else {
+          // Se asigna el contador de registro
+          vRegistroActual = 1;
+
+          // Se obtiene el registro del Array
+          objCatGasto = vArrCatsGasto[vRegistroActual - 1];
+        }
+      }
+      else if (pAccion == 'ultimo') {
+        // Se invocó al registro siguiente
+
+        if (vArrCatsGasto == null) {
+          // No exsiste una consulta activa
+          alert('Error, no hay una consulta activa. Primero debe invocar el botón "Consultar"!')
+
+          // Se interrumpe la ejecución de la función
+          return;
+        }
+
+        if (vRegistroActual == vArrCatsGasto.length) {
+          // Ya se mostró el último registro, no hay más registros para mostrar
+          alert('Este es el último registro!');
+          return;
+        }
+        else {
+          // Se asigna el contador de registro
+          vRegistroActual = vArrCatsGasto.length;
+
+          // Se obtiene el registro del Array
+          objCatGasto = vArrCatsGasto[vRegistroActual - 1];
+        }
+      }
+
+      // Se muestra el registro en la pantalla (formulario)
+      document.getElementById('co').value = objCatGasto.codigo;
+      document.getElementById('no').value = objCatGasto.nombre;
+      document.getElementById('li').value = objCatGasto.limite;
+    }
+
+    function boton_eliminar() {
+      var resultado;
+
+      // Se llena la variable de categoría de gasto con los valores que están en la página (formulario)
+      objCatGasto.codigo = document.getElementById('co').value;
+      objCatGasto.nombre = document.getElementById('no').value;
+      objCatGasto.limite = document.getElementById('li').value;
+
+      // Se invoca la función de eliminar
+      resultado = cat_gasto_eliminar(objCatGasto);
+
+      if (resultado == -1) {
+        alert('Error, el registro no existe en la base de datos');
+      }
+      else {
+        alert('Registro borrado exitosamente!');
+
+        // Se limpia el formulario
+        document.getElementById('frmPpal').reset();
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <center>
+    <h1>CATEGORÍAS DE GASTO</h1>
+    <form name="frmPpal" id="frmPpal">
+      <table border="1">
+        <tr>
+          <td><b>Código:</b></td>
+          <td><input type="text" id="co" placeholder="Ingrese un código"></td>
+          <td><b>Nombre:</b></td>
+          <td><input type="text" id="no" placeholder="Ingrese un nombre"></td>
+          <td><b>Límite:</b></td>
+          <td><input type="number" id="li" placeholder="Ingrese un número"></td>
+        </tr>
+      </table>
+    </form>
+    <br>
+    <table border="1">
+      <tr>
+        <td><button onclick="document.getElementById('frmPpal').reset();">Nuevo</button></td>
+        <td><button onclick="boton_guardar();">Guardar</button></td>
+        <td><button onclick="boton_consultar('consultar');">Consultar</button></td>
+        <td><button onclick="boton_consultar('primero');">Primero</button></td>
+        <td><button onclick="boton_consultar('ultimo');">Último</button></td>
+      </tr>
+      <tr>
+        <td><button onclick="boton_consultar('anterior');">Anterior</button></td>
+        <td><button onclick="boton_consultar('siguiente');">Siguiente</button></td>
+        <td><button onclick="boton_eliminar();">Eliminar</button></td>
+        <td><input type="submit" value="    salir   " onclick="window.close();"></td>
+        <td><button>_____</button></td>
+
+      </tr>
+    </table>
+  </center>
+  <br>
+  <center> <img src="imagen/MrPeasy-Inventory-Planning.jpg" height="250" width="325" blur(5px) /></center>
+</body>
+
+</html>
